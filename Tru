@@ -1,1 +1,93 @@
 
+-- LocalScript in StarterPlayerScripts
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local StarterGui = game:GetService("StarterGui")
+local player = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+
+-- Disable Core UI (removes menu, chat, backpack, etc.)
+StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, false)
+StarterGui:SetCore("ResetButtonCallback", false)
+
+-- Create ScreenGui
+local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+screenGui.Name = "LoadingScreen"
+screenGui.ResetOnSpawn = false
+
+-- Background
+local frame = Instance.new("Frame", screenGui)
+frame.Size = UDim2.new(1, 0, 1, 0)
+frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+
+-- Loading Text
+local loadingText = Instance.new("TextLabel", frame)
+loadingText.Size = UDim2.new(1, 0, 0.1, 0)
+loadingText.Position = UDim2.new(0, 0, 0.4, 0)
+loadingText.BackgroundTransparency = 1
+loadingText.Text = "Loading... 0%"
+loadingText.TextScaled = true
+loadingText.Font = Enum.Font.SourceSansBold
+loadingText.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+-- Subtext ("Bypassing anti-cheat")
+local subText = Instance.new("TextLabel", frame)
+subText.Size = UDim2.new(1, 0, 0.05, 0)
+subText.Position = UDim2.new(0, 0, 0.5, 0)
+subText.BackgroundTransparency = 1
+subText.Text = "Bypassing anti-cheat..."
+subText.TextScaled = true
+subText.Font = Enum.Font.SourceSansItalic
+subText.TextColor3 = Color3.fromRGB(180, 180, 180)
+
+-- Jumpscare Image
+local jumpscare = Instance.new("ImageLabel", frame)
+jumpscare.Size = UDim2.new(1, 0, 1, 0)
+jumpscare.Position = UDim2.new(0, 0, 0, 0)
+jumpscare.Image = "rbxassetid://13743730234" -- Replace with your jumpscare image
+jumpscare.ImageTransparency = 1
+jumpscare.BackgroundTransparency = 1
+jumpscare.ZIndex = 2
+
+-- Scream Sound
+local scream = Instance.new("Sound", frame)
+scream.SoundId = "rbxassetid://9118823106" -- Replace with your scream sound
+scream.Volume = 5
+
+-- Simulate Loading
+local percent = 0
+local loadingComplete = false
+
+task.spawn(function()
+	while percent < 100 do
+		percent += 1
+		loadingText.Text = "Loading... " .. percent .. "%"
+		wait(0.1)
+	end
+	loadingComplete = true
+end)
+
+-- Jumpscare after 3 minutes at 100%
+task.spawn(function()
+	while not loadingComplete do wait(1) end
+	local doneTime = tick()
+	while tick() - doneTime < 180 do wait(1) end
+
+	-- Jumpscare!
+	jumpscare.ImageTransparency = 0
+	scream:Play()
+	wait(3)
+	screenGui:Destroy()
+end)
+
+-- Trap effect loop (re-hides GUI repeatedly)
+task.spawn(function()
+	while true do
+		pcall(function()
+			StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, false)
+			StarterGui:SetCore("ResetButtonCallback", false)
+		end)
+		wait(1)
+	end
+end)
