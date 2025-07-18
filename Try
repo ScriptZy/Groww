@@ -38,18 +38,4 @@ DupeButton.MouseButton1Click:Connect(function()
 
     if garden then
         for _, item in pairs(garden:GetChildren()) do
-            if item:IsA("Model") then
-                local cloned = item:Clone()
-                cloned.Parent = garden
-                cloned:SetPrimaryPartCFrame(item:GetPrimaryPartCFrame() + Vector3.new(math.random(1,3), 0, math.random(1,3)))
-            end
-        end
-        DupeButton.Text = "✅ Duped!"
-    else
-        DupeButton.Text = "❌ Garden Not Found"
-    end
-end)
-
-CloseButton.MouseButton1Click:Connect(function()
-    ScreenGui:Destroy()
-end)
+            if item:IsA("Model") 
